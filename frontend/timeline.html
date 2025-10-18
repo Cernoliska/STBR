@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <title>Timeline Tiket</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>Timeline Tiket STBR</header>
+
+  <main id="timeline"></main>
+
+  <script>
+    async function loadTimeline() {
+      const res = await fetch("/api/tickets");
+      const data = await res.json();
+      document.getElementById("timeline").innerHTML = data
+        .map(
+          t => `
+          <div class="card">
+            <strong>[${t.type.toUpperCase()}]</strong> ${t.username || t.ip}
+            <p>${t.reason}</p>
+            ${t.revision_link ? `<a href="${t.revision_link}" target="_blank">Lihat Revisi</a>` : ""}
+            <small>Status: ${t.status}</small><br/>
+            <small>${t.created_at}</small>
+          </div>`
+        )
+        .join("");
+    }
+    loadTimeline();
+    setInterval(loadTimeline, 4000);
+  </script>
+</body>
+</html>
