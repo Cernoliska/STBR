@@ -1,26 +1,29 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <title>STBR – Sistem Tiket Banding dan Revisi</title>
-  <link rel="stylesheet" href="style.css" />
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>STBR – Halaman Utama</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header>STBR – Sistem Tiket Banding dan Revisi</header>
-  <main>
-    <h2>Selamat datang di STBR</h2>
+<header>STBR – Sistem Tiket Banding dan Revisi</header>
+<main>
+  <div class="card">
+    <h3>Selamat datang</h3>
     <p>Pilih jenis permohonan:</p>
     <div class="buttons">
-      <a href="tiket.html?type=akun">Banding Blokir Akun</a>
-      <a href="tiket.html?type=sementara">Blokir Akun Sementara</a>
-      <a href="tiket.html?type=ip">Banding Blokir IP</a>
-      <a href="tiket.html?type=revisi">Penghapusan Revisi</a>
+      <a class="button" href="form.html?type=blokir_akun">Banding Blokir Akun</a>
+      <a class="button" href="form.html?type=blokir_sementara">Banding Blokir Sementara</a>
+      <a class="button" href="form.html?type=blokir_ip">Banding Blokir IP</a>
+      <a class="button" href="form.html?type=hapus_revisi">Penghapusan Revisi</a>
     </div>
-    <div class="buttons">
-      <a href="timeline.html" class="alt">Lihat Timeline Tiket</a>
-      <a href="panel.html" class="alt">Panel Pengurus</a>
+    <div style="margin-top:12px">
+      <a class="button" href="timeline.html">Lihat Timeline Tiket</a>
+      <a class="button" href="panel.html">Panel Pengurus / Developer</a>
     </div>
-  </main>
-  <footer>© Janorovic Volkov — Wikipedia bahasa Indonesia</footer>
+  </div>
+</main>
+<footer>© Janorovic Volkov — Wikipedia bahasa Indonesia</footer>
 </body>
 </html>
