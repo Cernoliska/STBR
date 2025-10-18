@@ -28,4 +28,4 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(process.cwd(), "frontend", "index.html"));
 });
 
-app.listen(PORT, () => console.log(`STBR running on http://localhost:${PORT}`));
+app.listen(PORT, () => console.log(`STBR running on port ${PORT}`));
