@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="id">
+<head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Ajukan Tiket</title><link rel="stylesheet" href="style.css"></head>
+<body>
+<header>STBR – Sistem Tiket Banding dan Revisi</header>
+<main>
+  <div class="card">
+    <div id="formArea">Memuat formulir...</div>
+  </div>
+</main>
+<script>
+const params = new URLSearchParams(location.search);
+const type = params.get("type") || "blokir_akun";
+const formArea = document.getElementById("formArea");
+
+function render() {
+  if (type === "hapus_revisi") {
+    formArea.innerHTML = `
+      <h3>Pengajuan Penghapusan Revisi</h3>
+      <label>Pranala revisi (diff):</label>
+      <input id="revision_link" placeholder="https://id.wikipedia.org/w/index.php?diff=..." />
+      <label>Alasan mengapa revisi tersebut perlu dihapus / disembunyikan:</label>
+      <textarea id="reason"></textarea>
+      <button id="send">Kirim</button>
+    `;
+  } else {
+    const label = type === "blokir_ip" ? "Alamat IP" : "Nama akun";
+    formArea.innerHTML = `
+      <h3>Pengajuan Banding Blokir</h3>
+      <label>${label}:</label>
+      <input id="username" />
+      <label>Alasan:</label>
+      <textarea id="reason"></textarea>
+      <button id="send">Kirim</button>
+    `;
+  }
+  document.getElementById("send").addEventListener("click", submit);
+}
+
+async function submit(){
+  const payload = {
+    type,
+    username: document.getElementById("username")?.value || "",
+    ip_address: type === "blokir_ip" ? (document.getElementById("username")?.value || "") : "",
+    revision_link: document.getElementById("revision_link")?.value || "",
+    reason: document.getElementById("reason").value || ""
+  };
+  const res = await fetch("/api/tickets", {
+    method: "POST",
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify(payload)
+  });
+  const j = await res.json();
+  if (j.success) {
+    alert("Tiket dibuat. Kunci: " + j.key);
+    location.href = "tiket.html?key=" + encodeURIComponent(j.key);
+  } else {
+    alert("Gagal: " + (j.error||"server error"));
+  }
+}
+
+render();
+</script>
+</body>
+</html>
