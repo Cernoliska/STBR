@@ -1,3 +1,4 @@
+/* 🌙 STBR Global Style */
 :root {
   --bg: #f8f9fa;
   --card: #ffffff;
@@ -27,6 +28,7 @@ body {
   line-height: 1.6;
 }
 
+/* Header */
 header {
   background: var(--header-bg);
   color: var(--header-text);
@@ -36,12 +38,14 @@ header {
   box-shadow: 0 2px 4px var(--shadow);
 }
 
+/* Main layout */
 main {
   max-width: 800px;
   margin: 20px auto;
   padding: 0 15px;
 }
 
+/* Card component */
 .card {
   background: var(--card);
   border: 1px solid var(--border);
@@ -57,6 +61,7 @@ main {
   padding-bottom: 5px;
 }
 
+/* Buttons */
 button,
 a.button {
   background: var(--primary);
@@ -84,6 +89,7 @@ button.success {
   background: var(--success);
 }
 
+/* Input fields */
 input[type="text"],
 input[type="email"],
 textarea {
@@ -96,6 +102,7 @@ textarea {
   font-size: 14px;
 }
 
+/* Status badge */
 .status {
   display: inline-block;
   padding: 4px 10px;
@@ -120,6 +127,7 @@ textarea {
   color: #004085;
 }
 
+/* Notice boxes */
 .notice {
   background: #fff3cd;
   border: 1px solid #ffeeba;
@@ -139,6 +147,7 @@ textarea {
   font-weight: bold;
 }
 
+/* Links */
 a {
   color: var(--primary-dark);
   text-decoration: none;
@@ -178,4 +187,4 @@ footer {
     width: 100%;
     margin-top: 5px;
   }
-  }
+}
