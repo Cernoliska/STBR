@@ -1,31 +1,31 @@
 <!DOCTYPE html>
 <html lang="id">
-<head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Panel Pengurus</title><link rel="stylesheet" href="style.css"></head>
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Panel Pengurus</title>
+<link rel="stylesheet" href="style.css">
+</head>
 <body>
-<header>Panel Pengurus</header>
+<header>Panel Pengurus / Developer</header>
 <main>
   <div class="card">
-    <label>Masukkan nama pengguna (uji login):</label>
-    <input id="username" placeholder="" />
-    <button id="btnLogin">Masuk</button>
+    <button onclick="window.location='/auth/login'">Masuk dengan Wikimedia OAuth</button>
   </div>
   <div id="panelArea"></div>
 </main>
 <script>
-let role = 'user';
-document.getElementById('btnLogin').addEventListener('click', async () => {
-  const username = document.getElementById('username').value.trim();
-  if (!username) return alert('isi username');
-  const res = await fetch('/api/users/' + encodeURIComponent(username));
-  const j = await res.json();
-  role = j.role || 'user';
-  renderPanel();
-  setInterval(renderPanel, 5000);
-});
-
 async function renderPanel(){
   const res = await fetch('/api/admin/tickets');
+  if (res.status === 403) {
+    document.getElementById('panelArea').innerHTML = '<p>Silakan login dulu.</p>';
+    return;
+  }
   const data = await res.json();
+  const userRes = await fetch('/api/auth/me');
+  const user = await userRes.json();
+  const role = user.role || 'user';
+
   const area = document.getElementById('panelArea');
   area.innerHTML = `<h3>Daftar Tiket (role: ${role})</h3>` + data.map(t => `
     <div class="card">
@@ -52,6 +52,9 @@ async function blockIP(ip){
   await fetch('/api/admin/block-ip', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ ip_address: ip, reason, duration_hours:6, blocked_by: 'dev' }) });
   alert('IP diblokir sementara');
 }
+
+renderPanel();
+setInterval(renderPanel, 5000);
 </script>
 </body>
 </html>
