@@ -1,77 +1,57 @@
 <!DOCTYPE html>
 <html lang="id">
-<head>
-  <meta charset="UTF-8" />
-  <title>Panel Pengurus</title>
-  <link rel="stylesheet" href="style.css" />
-</head>
+<head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Panel Pengurus</title><link rel="stylesheet" href="style.css"></head>
 <body>
-  <header>Panel Pengurus & Developer</header>
-
+<header>Panel Pengurus</header>
+<main>
   <div class="card">
-    <label>Nama pengguna:</label>
-    <input id="username" type="text" placeholder="Masukkan nama pengguna..." />
-    <button onclick="loadPanel()">Masuk</button>
+    <label>Masukkan nama pengguna (uji login):</label>
+    <input id="username" placeholder="" />
+    <button id="btnLogin">Masuk</button>
   </div>
+  <div id="panelArea"></div>
+</main>
+<script>
+let role = 'user';
+document.getElementById('btnLogin').addEventListener('click', async () => {
+  const username = document.getElementById('username').value.trim();
+  if (!username) return alert('isi username');
+  const res = await fetch('/api/users/' + encodeURIComponent(username));
+  const j = await res.json();
+  role = j.role || 'user';
+  renderPanel();
+  setInterval(renderPanel, 5000);
+});
 
-  <div id="panel"></div>
+async function renderPanel(){
+  const res = await fetch('/api/admin/tickets');
+  const data = await res.json();
+  const area = document.getElementById('panelArea');
+  area.innerHTML = `<h3>Daftar Tiket (role: ${role})</h3>` + data.map(t => `
+    <div class="card">
+      <strong>${t.type}</strong> — ${t.username || t.ip_address}
+      <p>${t.reason}</p>
+      <small>${t.created_at}</small>
+      <p>Status: ${t.status}</p>
+      ${role !== 'user' ? `<button onclick="update('${t.key_token}','diproses')">Proses</button>
+                          <button onclick="update('${t.key_token}','selesai')">Selesai</button>
+                          <button onclick="update('${t.key_token}','ditolak')">Tolak</button>` : ''}
+      ${role === 'developer' && t.ip_address ? `<button onclick="blockIP('${t.ip_address}')">Blokir IP</button>` : ''}
+    </div>
+  `).join('');
+}
 
-  <script>
-    let userRole = "user";
+async function update(key, status){
+  const comment = prompt('Komentar (opsional)') || '';
+  await fetch('/api/admin/update', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ key, status, comment }) });
+  renderPanel();
+}
 
-    async function loadPanel() {
-      const username = document.getElementById("username").value.trim();
-      const res = await fetch(`/api/users/${username}`);
-      const user = await res.json();
-      userRole = user.role;
-      document.querySelector(".card").style.display = "none";
-      refreshPanel();
-      setInterval(refreshPanel, 5000);
-    }
-
-    async function refreshPanel() {
-      const res = await fetch("/api/admin/tickets");
-      const data = await res.json();
-      const panel = document.getElementById("panel");
-
-      panel.innerHTML = `<h3>Daftar Tiket (${userRole})</h3>` + data.map(t => `
-        <div class="card">
-          <strong>${t.type.toUpperCase()}</strong> — ${t.username || t.ip}
-          <p>${t.reason}</p>
-          <small>Status: ${t.status}</small>
-          ${
-            userRole !== "user"
-              ? `<br><button onclick="updateStatus(${t.id}, 'approved')">Terima</button>
-                 <button onclick="updateStatus(${t.id}, 'rejected')">Tolak</button>`
-              : ""
-          }
-          ${
-            userRole === "developer" && t.ip
-              ? `<button onclick="blockIP('${t.ip}')">Blokir IP</button>`
-              : ""
-          }
-        </div>
-      `).join("");
-    }
-
-    async function updateStatus(id, status) {
-      const comment = prompt("Tambahkan komentar (opsional):") || "";
-      await fetch("/api/admin/update", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id, status, comment })
-      });
-      refreshPanel();
-    }
-
-    async function blockIP(ip) {
-      await fetch("/api/admin/block-ip", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ip })
-      });
-      alert(`IP ${ip} diblokir sementara`);
-    }
-  </script>
+async function blockIP(ip){
+  const reason = prompt('Alasan blokir IP') || '';
+  await fetch('/api/admin/block-ip', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ ip_address: ip, reason, duration_hours:6, blocked_by: 'dev' }) });
+  alert('IP diblokir sementara');
+}
+</script>
 </body>
 </html>
