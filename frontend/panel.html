@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <title>Panel Pengurus</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>Panel Pengurus & Developer</header>
+
+  <div class="card">
+    <label>Nama pengguna:</label>
+    <input id="username" type="text" placeholder="Masukkan nama pengguna..." />
+    <button onclick="loadPanel()">Masuk</button>
+  </div>
+
+  <div id="panel"></div>
+
+  <script>
+    let userRole = "user";
+
+    async function loadPanel() {
+      const username = document.getElementById("username").value.trim();
+      const res = await fetch(`/api/users/${username}`);
+      const user = await res.json();
+      userRole = user.role;
+      document.querySelector(".card").style.display = "none";
+      refreshPanel();
+      setInterval(refreshPanel, 5000);
+    }
+
+    async function refreshPanel() {
+      const res = await fetch("/api/admin/tickets");
+      const data = await res.json();
+      const panel = document.getElementById("panel");
+
+      panel.innerHTML = `<h3>Daftar Tiket (${userRole})</h3>` + data.map(t => `
+        <div class="card">
+          <strong>${t.type.toUpperCase()}</strong> — ${t.username || t.ip}
+          <p>${t.reason}</p>
+          <small>Status: ${t.status}</small>
+          ${
+            userRole !== "user"
+              ? `<br><button onclick="updateStatus(${t.id}, 'approved')">Terima</button>
+                 <button onclick="updateStatus(${t.id}, 'rejected')">Tolak</button>`
+              : ""
+          }
+          ${
+            userRole === "developer" && t.ip
+              ? `<button onclick="blockIP('${t.ip}')">Blokir IP</button>`
+              : ""
+          }
+        </div>
+      `).join("");
+    }
+
+    async function updateStatus(id, status) {
+      const comment = prompt("Tambahkan komentar (opsional):") || "";
+      await fetch("/api/admin/update", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, status, comment })
+      });
+      refreshPanel();
+    }
+
+    async function blockIP(ip) {
+      await fetch("/api/admin/block-ip", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ip })
+      });
+      alert(`IP ${ip} diblokir sementara`);
+    }
+  </script>
+</body>
+</html>
