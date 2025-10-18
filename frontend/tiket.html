@@ -1,69 +1,35 @@
 <!DOCTYPE html>
 <html lang="id">
-<head>
-  <meta charset="UTF-8" />
-  <title>Formulir Tiket</title>
-  <link rel="stylesheet" href="style.css" />
-</head>
+<head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Detail Tiket</title><link rel="stylesheet" href="style.css"></head>
 <body>
-  <header>Formulir Permohonan Tiket</header>
-
-  <div class="card" id="form-area">
-    <p>Memuat formulir...</p>
-  </div>
-
-  <script>
-    const params = new URLSearchParams(window.location.search);
-    const type = params.get("type");
-    const area = document.getElementById("form-area");
-
-    const renderForm = () => {
-      let html = "";
-      switch (type) {
-        case "akun":
-        case "sementara":
-        case "ip":
-          html = `
-            <h3>Banding Blokir ${type === "ip" ? "Alamat IP" : "Akun"}</h3>
-            <label>Nama akun / alamat IP:</label>
-            <input id="username" type="text" placeholder="Nama atau IP" />
-            <label>Alasan kenapa Anda harus dibuka blokirnya:</label>
-            <textarea id="reason" rows="4"></textarea>
-            <button onclick="submitTicket()">Kirim</button>`;
-          break;
-        case "revisi":
-          html = `
-            <h3>Permohonan Penghapusan Revisi</h3>
-            <label>Pranala Revisi:</label>
-            <input id="revision_link" type="text" placeholder="https://id.wikipedia.org/wiki/?diff=..." />
-            <label>Alasan kenapa revisi tersebut harus dihapus / disembunyikan:</label>
-            <textarea id="reason" rows="4"></textarea>
-            <button onclick="submitTicket()">Kirim</button>`;
-          break;
-        default:
-          html = "<p>Tipe tidak dikenal.</p>";
-      }
-      area.innerHTML = html;
-    };
-
-    async function submitTicket() {
-      const data = {
-        type,
-        username: document.getElementById("username")?.value || "",
-        ip: type === "ip" ? document.getElementById("username").value : "",
-        revision_link: document.getElementById("revision_link")?.value || "",
-        reason: document.getElementById("reason")?.value,
-        comments: "",
-      };
-      await fetch("/api/tickets", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-      location.href = "timeline.html";
-    }
-
-    renderForm();
-  </script>
+<header>STBR – Sistem Tiket Banding dan Revisi</header>
+<main>
+  <div class="card" id="box">Memuat...</div>
+</main>
+<script>
+const params = new URLSearchParams(location.search);
+const key = params.get("key");
+const box = document.getElementById("box");
+async function load(){
+  if(!key) { box.innerHTML = "<p>Tidak ada kunci</p>"; return; }
+  const res = await fetch("/api/tickets/" + encodeURIComponent(key));
+  if (!res.ok) { box.innerHTML = "<p>Tiket tidak ditemukan</p>"; return; }
+  const t = await res.json();
+  box.innerHTML = `
+    <h3>${t.type}</h3>
+    <p><b>Kunci:</b> ${t.key_token}</p>
+    <p><b>User/IP:</b> ${t.username || t.ip_address}</p>
+    <p><b>Alasan:</b> ${t.reason}</p>
+    <p><b>Status:</b> <span class="status ${t.status}">${t.status}</span></p>
+    <h4>Timeline</h4>
+    <div id="timeline"></div>
+  `;
+  const eventsRes = t.events || [];
+  const timeline = document.getElementById("timeline");
+  if (!eventsRes.length) timeline.innerHTML = "<i>Belum ada aktivitas</i>";
+  else timeline.innerHTML = eventsRes.map(ev => `<div class="card"><small>${ev.time}</small><p>${ev.text}</p></div>`).join("");
+}
+load();
+</script>
 </body>
-  </html>
+</html>
