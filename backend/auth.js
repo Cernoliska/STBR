@@ -87,6 +87,11 @@ router.get("/logout", (req, res) => {
   req.session.destroy(() => res.redirect("/"));
 });
 
+router.get("/me", (req, res) => {
+  if (!req.session.user) return res.status(403).json({ error: "not logged in" });
+  res.json(req.session.user);
+});
+
 export function requireLogin(req, res, next) {
   if (!req.session || !req.session.user) return res.redirect("/auth/login");
   next();
