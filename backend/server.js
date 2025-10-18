@@ -1,23 +1,31 @@
 import express from "express";
 import cors from "cors";
 import bodyParser from "body-parser";
-import { initDB } from "./db.js";
-import ticketRoutes from "./routes/tickets.js";
-import userRoutes from "./routes/users.js";
-import adminRoutes from "./routes/admin.js";
+import path from "path";
+import { getDb } from "./db.js";
+import ticketsRouter from "./routes/tickets.js";
+import adminRouter from "./routes/admin.js";
+import usersRouter from "./routes/users.js";
+import authRouter, { requireLogin } from "./auth.js";
 
 const app = express();
-const PORT = 8080;
+const PORT = process.env.PORT || 8080;
 
 app.use(cors());
 app.use(bodyParser.json());
-app.use(express.static("frontend"));
+app.use("/auth", authRouter);
 
-const db = await initDB();
+const db = await getDb();
 app.locals.db = db;
 
-app.use("/api/tickets", ticketRoutes);
-app.use("/api/users", userRoutes);
-app.use("/api/admin", adminRoutes);
+app.use("/api/tickets", ticketsRouter);
+app.use("/api/admin", adminRouter);
+app.use("/api/users", usersRouter);
 
-app.listen(PORT, () => console.log(`[Log]: STBR berjalan di http://localhost:${PORT}`));
+app.use(express.static(path.join(process.cwd(), "frontend")));
+
+app.get("/", (req, res) => {
+  res.sendFile(path.join(process.cwd(), "frontend", "index.html"));
+});
+
+app.listen(PORT, () => console.log(`STBR running on http://localhost:${PORT}`));
